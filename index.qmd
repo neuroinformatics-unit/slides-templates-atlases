@@ -1,5 +1,5 @@
 ---
-title: On (brain) templates and atlases
+title: On brain templates and atlases
 subtitle: and how to build them
 author: Niko Sirmpilatze
 execute: 
@@ -17,7 +17,7 @@ format:
             numbers: true
         chalkboard: true
         scrollable: true
-        preview-links: false
+        preview-links: true
         view-distance: 10
         mobile-view-distance: 10
         auto-animate: true
@@ -70,4 +70,84 @@ papers:
 
 ::: aside
 Title slide image credit: [Katja Heuer & Roberto Toro, 2020](https://zenodo.org/records/4274008)
+:::
+
+## What is a brain template?
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](img/TemplateAsMold.png)
+:::
+
+::: {.column width="50%"}
+- a standard reference for brain anatomy
+- a common coordinate system - a "space"
+- aliases: *reference*, *standard*
+:::
+
+::::
+
+## What are templates used for?
+
+- average results from multiple subjects within a study
+  - example: [One of my own papers](https://www.nature.com/articles/s41598-019-53144-y/figures/3)
+- compare results across studies (e.g. coordinate-based meta-analysis)
+  - example: [Neurosynth](https://neurosynth.org/)
+- measure deviations from the "norm":
+  - example: Deformation-based morphometry (more on this later)
+
+## Too many templates!
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![source: [https://xkcd.com/927](https://xkcd.com/927)](https://imgs.xkcd.com/comics/standards.png){height=400px}
+:::
+
+::: {.column width="50%"}
+Coping:
+
+- [templateflow](https://www.templateflow.org/)
+- [RheMAP](https://github.com/PRIME-RE/RheMAP)
+:::
+
+::::
+
+## Some "famous" templates
+
+:::: {.columns}
+
+::: {.column width="50%"}
+👨 Human
+
+- [Talairach coordinates (1967)](https://en.wikipedia.org/wiki/Talairach_coordinates)
+- [The MNI space (1992-onwards)](https://mcin.ca/research/neuroimaging-methods/atlases/)
+- [The BigBrain (2013)](https://bigbrainproject.org)
+:::
+
+
+::: {.column width="50%"}
+🐭 The Allen Mouse Brain Common Coordinate Framework
+
+![](img/allen_mouse_template.png){height=600px}
+:::
+
+::::
+
+
+## What is an atlas?
+
+> A Titan condemned to hold up the heavens or sky for eternity after the Titanomachy
+
+> The most superior (first) cervical vertebra (C1) of the spine and is located in the neck.
+
+> A collection of maps; it is typically a bundle of maps of Earth or of a region of Earth. 
+
+::: {.fragment}
+> A **brain atlas** is composed of serial sections along different anatomical planes of the healthy or diseased developing or adult animal or human brain where each relevant brain structure is assigned a number of coordinates to define its outline or volume. Brain atlases are contiguous, comprehensive results of visual brain mapping and may include anatomical, genetic or functional features.
+:::
+
+::: aside
+source: [Wikipedia](https://en.wikipedia.org/)
 :::
