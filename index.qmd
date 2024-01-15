@@ -1,0 +1,111 @@
+---
+title: A template presentation
+subtitle: so much fun
+author: SWC Neuroinformatics Unit
+execute: 
+  enabled: true
+format:
+    revealjs:
+        theme: [default, niu-dark.scss]
+        logo: img/logo_niu_dark.png
+        footer: "Edit this footer | 2023-07-26"
+        slide-number: c
+        menu:
+            numbers: true
+        chalkboard: true
+        scrollable: true
+        preview-links: false
+        view-distance: 10
+        mobile-view-distance: 10
+        auto-animate: true
+        auto-play-media: true
+        code-overflow: wrap
+        highlight-style: atom-one
+        mermaid: 
+          theme: neutral
+          fontFamily: arial
+          curve: linear
+    html:
+        theme: [default, niu-dark.scss]
+        logo: img/logo_niu_dark.png
+        date: "2023-07-05"
+        toc: true
+        code-overflow: scroll
+        highlight-style: atom-one
+        mermaid: 
+          theme: neutral
+          fontFamily: arial
+          curve: linear
+          margin-left: 0
+        embed-resources: true
+        page-layout: full
+my-custom-stuff:
+   my-reuseable-variable: "I can use this wherever I want in the markdown, and change it in only once place :)"
+---
+
+## Contents
+
+Some example slides - [also look at example RevealJS slides in the Quarto docs](https://quarto.org/docs/presentations/revealjs/)
+
+* Non-executable and executable code-blocks
+* bullet points with highlighting 
+* two-column slides 
+* how to include a slide from a separate MD file
+* preview and link to a webpage
+
+## Just a code block, nothing gets executed...
+
+... but there is some fancy highlighting
+
+```{.python code-line-numbers="1|3|4-9"}
+from pathlib import Path
+
+home_path = Path.home()
+if home_path.exists():
+  data_path = home_path / "data"
+else:
+  pass
+  # raise some error maybe?
+```
+
+## A code block that's actually executed at render-time
+
+```{python}
+#| echo: true
+#| code-fold: true
+
+from pathlib import Path
+
+print("Hello world")
+```
+
+## You can execute code without showing that you have by using #|echo: false
+```{python}
+#| echo: false
+
+from pathlib import Path
+
+print("Hello world")
+```
+
+{{< include slides/extra_slide.qmd >}}
+
+## An example image
+
+Include an image:
+
+![](img/bg_logo_wide.png){width=900 fig-align=center}
+
+
+## Link and a preview a webpage:
+
+::: {style="text-align: center; margin-top: 1em"}
+[interoperable Python-based tools for computational neuroanatomy](https://brainglobe.info/index.html){preview-link="true" style="text-align: center"}
+:::
+
+## Use a variable several times
+
+Variables defined in the metadata is re-useable anywhere
+
+* {{< meta my-custom-stuff.my-reuseable-variable >}}
+* {{< meta my-custom-stuff.my-reuseable-variable >}}
