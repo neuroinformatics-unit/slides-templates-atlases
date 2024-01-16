@@ -1,6 +1,5 @@
 ---
-title: On brain templates and atlases
-subtitle: and how to build them
+title: On brain templates and atlases and how to build them
 author: Niko Sirmpilatze
 execute: 
   enabled: true
@@ -60,17 +59,22 @@ papers:
 
 ## Contents
 
-* What is a template?
-* What is an atlas?
-* Use cases
-* Image registration primer
-* How to build an atlas
-* Building population templates with ANTs
+* On brain templates and atlases
+* How to build a brain atlas
 * `brainglobe-template-builder`
 
 ::: aside
 Title slide image credit: [Katja Heuer & Roberto Toro, 2020](https://zenodo.org/records/4274008)
 :::
+
+## Where did I learn all this?
+
+![](img/burst-suppression.png){fig-align="center" height=700px}
+
+::: aside
+[Sirmpilatze et al., 2021. eLife](https://elifesciences.org/articles/74813)
+:::
+
 
 ## What is a brain template?
 
@@ -88,31 +92,18 @@ Title slide image credit: [Katja Heuer & Roberto Toro, 2020](https://zenodo.org/
 
 ::::
 
+## Multiple reference images - same space
+
+![](img/MultipleReferences.png){height=600px fig-align="center"}
+
 ## What are templates used for?
 
 - average results from multiple subjects within a study
-  - example: [One of my own papers](https://www.nature.com/articles/s41598-019-53144-y/figures/3)
+  - example: [Sirmpilatze et al., 2019. *SciRep*: Figure 3](https://www.nature.com/articles/s41598-019-53144-y/figures/3)
 - compare results across studies (e.g. coordinate-based meta-analysis)
   - example: [Neurosynth](https://neurosynth.org/)
 - measure deviations from the "norm":
   - example: Deformation-based morphometry (more on this later)
-
-## Too many templates!
-
-:::: {.columns}
-
-::: {.column width="50%"}
-![source: [https://xkcd.com/927](https://xkcd.com/927)](https://imgs.xkcd.com/comics/standards.png){height=400px}
-:::
-
-::: {.column width="50%"}
-Coping:
-
-- [templateflow](https://www.templateflow.org/)
-- [RheMAP](https://github.com/PRIME-RE/RheMAP)
-:::
-
-::::
 
 ## Some "famous" templates
 
@@ -128,9 +119,7 @@ Coping:
 
 
 ::: {.column width="50%"}
-🐭 The Allen Mouse Brain Common Coordinate Framework
-
-![](img/allen_mouse_template.png){height=600px}
+![🐭 [The Allen Mouse Brain Common Coordinate Framework](https://doi.org/10.1016/j.cell.2020.04.007)](img/allen_mouse_template.png){height=600px style="text-align: center"}
 :::
 
 ::::
@@ -145,9 +134,196 @@ Coping:
 > A collection of maps; it is typically a bundle of maps of Earth or of a region of Earth. 
 
 ::: {.fragment}
-> A **brain atlas** is composed of serial sections along different anatomical planes of the healthy or diseased developing or adult animal or human brain where each relevant brain structure is assigned a number of coordinates to define its outline or volume. Brain atlases are contiguous, comprehensive results of visual brain mapping and may include anatomical, genetic or functional features.
+**A Brain Atlas:**
+
+> is composed of serial sections along different anatomical planes of the healthy or diseased developing or adult animal or human brain where **each relevant brain structure is assigned a number of coordinates to define its outline or volume**. Brain atlases are contiguous, comprehensive results of visual brain mapping and may include anatomical, genetic or functional features.
 :::
 
 ::: aside
 source: [Wikipedia](https://en.wikipedia.org/)
 :::
+
+## Annotations
+
+aliases: *labels*, *regions*, *parcellations*, *segmentations*, *structures*
+
+:::: {.columns}
+
+::: {.column width="40%"}
+
+![🐭 [The Allen Mouse Brain Atlas](https://mouse.brain-map.org/)](img/allen_mouse_annotation.png){height=600px style="text-align: center"}
+
+:::
+
+::: {.column width="60%" .fragment}
+
+![](img/AnnotationTypes.png){height=600px}
+
+:::
+
+::::
+
+## 👨 Brodmann areas (1909)
+
+![[source: Wikipedia](https://en.wikipedia.org/wiki/Brodmann_area)](img/Brodmann_Areas.jpg){height=650px style="text-align: center"}
+
+## 👨 The HCP Multimodal Parcellation (2016)
+![[Glasser et al., 2016. *Nature*](https://www.nature.com/articles/nature18933)](img/HCP_MMP.jpg){height=650px style="text-align: center"}
+
+
+## Atlases: from minimal to comprehensive
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**Minimal**
+
+- 1 reference image
+- 1 flat annotation image
+
+![🐒 Mmacaque D99 atlas, source: [AFNI](https://afni.nimh.nih.gov)](img/D99_v2.png){height=300px style="text-align: center"}
+:::
+
+::: {.column width="50%"}
+**Comprehensive** 
+
+- multi-modal and/or -scale templates
+- multiple/hierarchical annotations
+
+![🐒 Macaque CHARM atlas, source: [Jung et al., 2021](https://doi.org/10.1016/j.neuroimage.2021.117997)](img/CHARM.jpg){height=300px style="text-align: center"}
+:::
+
+::::
+
+::: aside
+Case study: [marmosetbrainmapping.org](https://marmosetbrainmapping.org/atlas.html)
+:::
+
+## How are atlases used
+
+![[Wang et al., 2020. *Cell*](https://www.sciencedirect.com/science/article/pii/S0092867420304025)](img/allen_atlas_usecase.png){height=650px style="text-align: center" fig-align="center"}
+
+## Too many atlases!
+:::: {.columns}
+
+::: {.column width="70%"}
+![source: [https://xkcd.com/927](https://xkcd.com/927)](https://imgs.xkcd.com/comics/standards.png){height=500px style="text-align: center"}
+:::
+
+::: {.column width="30%"}
+Remedies
+
+- [BrainGlobe Atlas API](https://brainglobe.info/)
+- [templateflow](https://www.templateflow.org/)
+- [RheMAP](https://github.com/PRIME-RE/RheMAP)
+:::
+
+::::
+
+::: aside
+**But we need more!** Across species, developmental stages, imaging modalities, etc.
+:::
+
+## Atlases are at the heart of BrainGlobe
+
+![](img/BG_atlases.png){height=650px fig-align="center"}
+
+::: aside
+and computation neuroanatomy in general...
+:::
+
+## How to make a new brain atlas
+
+:::: {.columns}
+
+::: {.column width="50%"}
+**1. Acquire 3D whole-brain images**
+
+- Medical imaging: CT, MRI
+- 3D light microscopy: STPT, fMOST, LSFM
+
+**2. Build a template**
+
+- Pick a single reference subject, or
+- Build an unbiased population average
+:::
+
+::: {.column width="50%" .fragment}
+**3. Annotate brain areas**
+
+- Needs manual curation from experts
+- Can incorporate data-driven approaches
+
+**4. Package and distribute**
+
+- Publish on a public repository and document
+- Make it easy to use (API?)
+:::
+
+::::
+
+## What's our plan?
+
+| Step | Task | Method |
+| - | --- | ----- |
+| **1.** | 3D whole-brain imaging | AMF + collaborating imaging  facilites |
+| **2.** | Build a template | `braiglobe-template-builder` |
+| **3.** | Annotate regions |  Collaborating experts (with napari widgets?) |
+| **4.** | Package for BrainGlobe | Improved `bg-atlasgen`  (Alessandro & Viktor) |
+| **5.** | Distribution | `bg-atlasapi` |
+
+## Population average templates
+
+The naive way: register and average the brains
+
+Types of registration (feature-based vs intensity-based)
+
+## How to make an unbiased average
+
+The Fonov 2011 method
+
+Two contraints:
+- minimise MSE between each transformed image and the template
+- minimise the deformation field
+
+Advantages:
+- unbiased
+- super-resolution
+
+## Improved with the addition of SyN
+
+Symmetric diffeomorphic registration
+ANTs
+
+## The unbiased averaging algorithm
+
+![Implemented in ANTs as `antsMultivariateTemplateConstruction2.sh`](img/ANTs_template_construction.png){height=650px style="text-align: center" fig-align="center"}
+
+## The effect of iterations
+- Fonov
+- Allen
+
+## The improved algorithm
+
+By COBRA lab
+
+Important improvements:
+- Better pyramids
+- Masking
+
+Niceties:
+- Allows resuming if interrupted
+- Logging
+- Cluster parallelisation
+- Organises output files in a nested directory structure
+
+## The dependency pyramid
+
+template-builder -> COBRA -> ANTs
+
+## Necessary preprocessing
+
+![](img/BG-template-builder%20preprocessing.png){height=650px style="text-align: center" fig-align="center"}
+
+
+
