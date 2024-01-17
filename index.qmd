@@ -193,7 +193,7 @@ aliases: *labels*, *regions*, *parcellations*, *segmentations*, *structures*
 - 1 reference image
 - 1 flat annotation image
 
-![🐒 Mmacaque D99 atlas, source: [AFNI](https://afni.nimh.nih.gov)](img/D99_v2.png){height=300px style="text-align: center"}
+![🐒 Macaque D99 atlas, source: [AFNI](https://afni.nimh.nih.gov)](img/D99_v2.png){height=300px style="text-align: center"}
 :::
 
 ::: {.column width="50%"}
