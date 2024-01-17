@@ -100,12 +100,22 @@ Title slide image credit: [Katja Heuer & Roberto Toro, 2020](https://zenodo.org/
 
 ## What are templates used for?
 
+:::: {.columns}
+
+::: {.column width="50%"}
 - average results from multiple subjects within a study
   - example: [Sirmpilatze et al., 2019. *SciRep*: Figure 3](https://www.nature.com/articles/s41598-019-53144-y/figures/3)
 - compare results across studies (e.g. coordinate-based meta-analysis)
   - example: [Neurosynth](https://neurosynth.org/)
 - measure deviations from the "norm":
-  - example: Deformation-based morphometry (more on this later)
+  - example: Deformation-based morphometry
+:::
+
+::: {.column width="50%" .fragment}
+![[Lerch et al., 2011. *Methods Mol Biol.*](https://doi.org/10.1007/978-1-61737-992-5_17)](img/DBM.png){height=500px fig-align="center" style="text-align: center"}
+:::
+
+::::
 
 ## Some "famous" templates
 
@@ -236,23 +246,77 @@ and computation neuroanatomy in general...
 
 # Image registration primer
 
-## linear transformations
+## Linear transformations
 
 ![](img/LinearTransformations.png){height=650px style="text-align: center" fig-align="center"}
+
+::: aside
+**Benefits:** fast, efficient, composable, invertible
+
+**Drawbacks:** limited to global transformations (all parts of the image move the same way)
+:::
 
 ## Nonlinear transformations
 
 :::: {.columns}
 
 ::: {.column width="50%"}
-![source: youtube.com/3b1b](img/nonlinear-transform.jpg){height=500px style="text-align: center" fig-align="center"}
+![3 params per voxel (3D vector field), source: [3blue1brown](https://www.youtube.com/3blue1brown)](img/nonlinear-transform.jpg){height=500px style="text-align: center" fig-align="center"}
 :::
 
 ::: {.column width="50%"}
-![[Symmetric Diffeomorphic (SyN): Avants et al., 2011. *Neuroimage*](https://www.sciencedirect.com/science/article/pii/S1361841507000606)](img/Avants2008_-Fig1.png){height=500px style="text-align: center" fig-align="center"}
+![Symmetric Diffeomorphic (SyN): [Avants et al., 2011. *Neuroimage*](https://www.sciencedirect.com/science/article/pii/S1361841507000606)](img/Avants2008_-Fig1.png){height=500px style="text-align: center" fig-align="center"}
 :::
 
 ::::
+
+::: aside
+**Benefits:** can correct local mismatches (e.g cortical folds)
+
+**Drawbacks:** computationally expensive, slow, deformation files are large
+
+**SyN properties:** 1-to-1 mapping, invertible, smooth, topology-preserving
+:::
+
+
+## Image registration as an optimisation problem
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- __Degrees of freedom (DOF):__ rigid (6), affine (12), nonlinear (n_voxels x 3)
+
+- __Constraints:__ maximize similarity, minimize deformation
+
+- __Similarity metrics:__ mutual information, cross-correlation etc.
+
+- __Optimisation algorithms:__ Nowdays mostly gradient descent/ascent
+:::
+
+::: {.column width="50%" .fragment}
+![The "scale pyramid"](img/scale_pyramid.png){height=400px style="text-align: center"}
+
+- First match rough features, then refine
+- First linear, then nonlinear
+- Increase DOF as we go down the pyramid
+:::
+
+::::
+
+## Advanced Normalisation Tools (ANTs)
+
+[ANTS](https://github.com/ANTsX/ANTs)
+
+- implemented in C++
+- uses ITK (Insight Segmentation and Registration Toolkit)
+- command-line interface
+- includes the *canonical* SyN algorithm implementation 
+- provides full control over the optimisation process:
+  - transform types, DOF, similarity metrics, "scale pyramid" traversal, etc.
+- Two main commands: `antsRegistration` and `antsApplyTransforms`
+- Provides some shell scripts for convenience:
+  - e.g. `antsMultivariateTemplateConstruction2.sh`
+- very powerful, but not very user-friendly
 
 
 # How to build a brain atlas
@@ -336,32 +400,53 @@ and computation neuroanatomy in general...
 
 ![[Wang et al., 2020. *Cell*](https://www.sciencedirect.com/science/article/pii/S0092867420304025)](img/allen_single-brain_vs_template.png){height=650px style="text-align: center" fig-align="center"}
 
-## Improved with the addition of SyN
+## Implementations of unbiased template construction
 
-Symmetric diffeomorphic registration
-ANTs
+::: {.incremental}
+- ANTs: `antsMultivariateTemplateConstruction2.sh` (uses SyN for nonlinear registration)
+- [optimized_antsMultivariateTemplateConstruction](https://github.com/CoBrALab/optimized_antsMultivariateTemplateConstruction/tree/master) by [CoBra Lab](https://www.cobralab.ca/)
+  - more *sensible* defaults to the ANTs script
+  - optimal traversal of "scale pyramid" (depending on image size)
+  - allows resuming if interrupted
+  - designed for parallelisation on HPC clusters (with SLURM)
+  - integrates masking during registration
+:::
 
-## The unbiased averaging algorithm
+# `brainglobe-template-builder`
 
-![Implemented in ANTs as `antsMultivariateTemplateConstruction2.sh`](img/ANTs_template_construction.png){height=650px style="text-align: center" fig-align="center"}
+## Why is it needed? {.smaller}
 
-## The improved algorithm
+:::: {.columns}
 
-By COBRA lab
+::: {.column width="60%"}
 
-Important improvements:
-- Better pyramids
-- Masking
+*Standing on the shoulders of giants* (or *turtles all the way down*):
 
-Niceties:
-- Allows resuming if interrupted
-- Logging
-- Cluster parallelisation
-- Organises output files in a nested directory structure
+- [`brainglobe-template-builder`](https://github.com/brainglobe/brainglobe-template-builder) 
+- `optimized_antsMultivariateTemplateConstruction` 
+- `antsMultivariateTemplateConstruction2.sh` 
+- `ANTs` 
+- `ITK`
 
-## The dependency pyramid
+:::
 
-template-builder -> COBRA -> ANTs
+::: {.column width="40%" .fragment}
+
+Added value:
+
+- GUI via napari widgets
+- Preprocessing of images
+- tiff > nifti conversion
+- Feed into the template construction pipeline
+- Visualise results (QC)
+
+:::
+
+::::
+
+::: aside
+Let's democratise template building!
+:::
 
 ## Necessary preprocessing
 
