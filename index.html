@@ -11,7 +11,7 @@
   <meta name="generator" content="quarto-1.3.450">
 
   <meta name="author" content="Niko Sirmpilatze">
-  <title>On (brain) templates and atlases</title>
+  <title>On brain templates and atlases, and how to build them</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
@@ -328,8 +328,7 @@
     <div class="slides">
 
 <section id="title-slide" data-background-color="#000000" data-background-image="img/HeuerToro_primate-brains.jpg" data-background-opacity="0.5" data-background-position="center" data-background-size="cover" class="quarto-title-block center">
-  <h1 class="title">On (brain) templates and atlases</h1>
-  <p class="subtitle">and how to build them</p>
+  <h1 class="title">On brain templates and atlases, and how to build them</h1>
 
 <div class="quarto-title-authors">
 <div class="quarto-title-author">
@@ -343,22 +342,509 @@ Niko Sirmpilatze
 <section id="contents" class="slide level2">
 <h2>Contents</h2>
 <ul>
-<li>What is a template?</li>
-<li>What is an atlas?</li>
-<li>Use cases</li>
+<li>On brain templates and atlases</li>
 <li>Image registration primer</li>
-<li>How to build an atlas</li>
-<li>Building population templates with ANTs</li>
+<li>How to build a brain atlas</li>
 <li><code>brainglobe-template-builder</code></li>
 </ul>
 
+<aside><div>
+<p>Title slide image credit: <a href="https://zenodo.org/records/4274008">Katja Heuer &amp; Roberto Toro, 2020</a></p>
+</div></aside></section>
+<section id="where-did-i-learn-all-this" class="slide level2">
+<h2>Where did I learn all this?</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="img/burst-suppression.png" height="700"></p>
+</figure>
+</div>
+
+<aside><div>
+<p><a href="https://elifesciences.org/articles/74813">Sirmpilatze et al., 2021. eLife</a></p>
+</div></aside></section>
+<section>
+<section id="on-templates-and-atlases" class="title-slide slide level1 center">
+<h1>On templates and atlases</h1>
+
+</section>
+<section id="what-is-a-brain-template" class="slide level2">
+<h2>What is a brain template?</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="img/TemplateAsMold.png"></p>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>a standard reference for brain anatomy</li>
+<li>a common coordinate system - a “space”</li>
+<li>aliases: <em>reference</em>, <em>standard</em></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="multiple-reference-images---same-space" class="slide level2">
+<h2>Multiple reference images - same space</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="img/MultipleReferences.png" height="600"></p>
+</figure>
+</div>
+</section>
+<section id="what-are-templates-used-for" class="slide level2">
+<h2>What are templates used for?</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>average results from multiple subjects within a study
+<ul>
+<li>example: <a href="https://www.nature.com/articles/s41598-019-53144-y/figures/3">Sirmpilatze et al., 2019. <em>SciRep</em>: Figure 3</a></li>
+</ul></li>
+<li>compare results across studies (e.g.&nbsp;coordinate-based meta-analysis)
+<ul>
+<li>example: <a href="https://neurosynth.org/">Neurosynth</a></li>
+</ul></li>
+<li>measure deviations from the “norm”:
+<ul>
+<li>example: Deformation-based morphometry</li>
+</ul></li>
+</ul>
+</div><div class="column fragment" style="width:50%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/DBM.png" height="500"></p>
+<figcaption><a href="https://doi.org/10.1007/978-1-61737-992-5_17">Lerch et al., 2011. <em>Methods Mol Biol.</em></a></figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="some-famous-templates" class="slide level2">
+<h2>Some “famous” templates</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p>👨 Human</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Talairach_coordinates">Talairach coordinates (1967)</a></li>
+<li><a href="https://mcin.ca/research/neuroimaging-methods/atlases/">The MNI space (1992-onwards)</a></li>
+<li><a href="https://bigbrainproject.org">The BigBrain (2013)</a></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/allen_mouse_template.png" height="600"></p>
+<figcaption>🐭 <a href="https://doi.org/10.1016/j.cell.2020.04.007">The Allen Mouse Brain Common Coordinate Framework</a></figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="what-is-an-atlas" class="slide level2">
+<h2>What is an atlas?</h2>
+<blockquote>
+<p>A Titan condemned to hold up the heavens or sky for eternity after the Titanomachy</p>
+</blockquote>
+<blockquote>
+<p>The most superior (first) cervical vertebra (C1) of the spine and is located in the neck.</p>
+</blockquote>
+<blockquote>
+<p>A collection of maps; it is typically a bundle of maps of Earth or of a region of Earth.</p>
+</blockquote>
+<div class="fragment">
+<p><strong>A Brain Atlas:</strong></p>
+<blockquote>
+<p>is composed of serial sections along different anatomical planes of the healthy or diseased developing or adult animal or human brain where <strong>each relevant brain structure is assigned a number of coordinates to define its outline or volume</strong>. Brain atlases are contiguous, comprehensive results of visual brain mapping and may include anatomical, genetic or functional features.</p>
+</blockquote>
+</div>
+
+<aside><div>
+<p>source: <a href="https://en.wikipedia.org/">Wikipedia</a></p>
+</div></aside></section>
+<section id="annotations" class="slide level2">
+<h2>Annotations</h2>
+<p>aliases: <em>labels</em>, <em>regions</em>, <em>parcellations</em>, <em>segmentations</em>, <em>structures</em></p>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/allen_mouse_annotation.png" height="600"></p>
+<figcaption>🐭 <a href="https://mouse.brain-map.org/">The Allen Mouse Brain Atlas</a></figcaption>
+</figure>
+</div>
+</div><div class="column fragment" style="width:60%;">
+<p><img data-src="img/AnnotationTypes.png" height="600"></p>
+</div>
+</div>
+</section>
+<section id="brodmann-areas-1909" class="slide level2">
+<h2>👨 Brodmann areas (1909)</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/Brodmann_Areas.jpg" height="650"></p>
+<figcaption><a href="https://en.wikipedia.org/wiki/Brodmann_area">source: Wikipedia</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="the-hcp-multimodal-parcellation-2016" class="slide level2">
+<h2>👨 The HCP Multimodal Parcellation (2016)</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/HCP_MMP.jpg" height="650"></p>
+<figcaption><a href="https://www.nature.com/articles/nature18933">Glasser et al., 2016. <em>Nature</em></a></figcaption>
+</figure>
+</div>
+</section>
+<section id="atlases-from-minimal-to-comprehensive" class="slide level2">
+<h2>Atlases: from minimal to comprehensive</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>Minimal</strong></p>
+<ul>
+<li>1 reference image</li>
+<li>1 flat annotation image</li>
+</ul>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/D99_v2.png" height="300"></p>
+<figcaption>🐒 Macaque D99 atlas, source: <a href="https://afni.nimh.nih.gov">AFNI</a></figcaption>
+</figure>
+</div>
+</div><div class="column" style="width:50%;">
+<p><strong>Comprehensive</strong></p>
+<ul>
+<li>multi-modal and/or -scale templates</li>
+<li>multiple/hierarchical annotations</li>
+</ul>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/CHARM.jpg" height="300"></p>
+<figcaption>🐒 Macaque CHARM atlas, source: <a href="https://doi.org/10.1016/j.neuroimage.2021.117997">Jung et al., 2021</a></figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<aside><div>
+<p>Case study: <a href="https://marmosetbrainmapping.org/atlas.html">marmosetbrainmapping.org</a></p>
+</div></aside></section>
+<section id="how-are-atlases-used" class="slide level2">
+<h2>How are atlases used</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/allen_atlas_usecase.png" height="650"></p>
+<figcaption><a href="https://www.sciencedirect.com/science/article/pii/S0092867420304025">Wang et al., 2020. <em>Cell</em></a></figcaption>
+</figure>
+</div>
+</section>
+<section id="too-many-atlases" class="slide level2">
+<h2>Too many atlases!</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="https://imgs.xkcd.com/comics/standards.png" height="500"></p>
+<figcaption>source: <a href="https://xkcd.com/927">https://xkcd.com/927</a></figcaption>
+</figure>
+</div>
+</div><div class="column" style="width:30%;">
+<p>Remedies</p>
+<ul>
+<li><a href="https://brainglobe.info/">BrainGlobe Atlas API</a></li>
+<li><a href="https://www.templateflow.org/">templateflow</a></li>
+<li><a href="https://github.com/PRIME-RE/RheMAP">RheMAP</a></li>
+</ul>
+</div>
+</div>
+
+<aside><div>
+<p><strong>But we need more!</strong> Across species, developmental stages, imaging modalities, etc.</p>
+</div></aside></section>
+<section id="atlases-are-at-the-heart-of-brainglobe" class="slide level2">
+<h2>Atlases are at the heart of BrainGlobe</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="img/BG_atlases.png" height="650"></p>
+</figure>
+</div>
+
+<aside><div>
+<p>and computation neuroanatomy in general…</p>
+</div></aside></section></section>
+<section>
+<section id="image-registration-primer" class="title-slide slide level1 center">
+<h1>Image registration primer</h1>
+
+</section>
+<section id="linear-transformations" class="slide level2">
+<h2>Linear transformations</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/LinearTransformations.png" height="650"></p>
+</figure>
+</div>
+
+<aside><div>
+<p><strong>Benefits:</strong> fast, efficient, composable, invertible</p>
+<p><strong>Drawbacks:</strong> limited to global transformations (all parts of the image move the same way)</p>
+</div></aside></section>
+<section id="nonlinear-transformations" class="slide level2">
+<h2>Nonlinear transformations</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/nonlinear-transform.jpg" height="500"></p>
+<figcaption>3 params per voxel (3D vector field), source: <a href="https://www.youtube.com/3blue1brown">3blue1brown</a></figcaption>
+</figure>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/Avants2008_-Fig1.png" height="500"></p>
+<figcaption>Symmetric Diffeomorphic (SyN): <a href="https://www.sciencedirect.com/science/article/pii/S1361841507000606">Avants et al., 2011. <em>Neuroimage</em></a></figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<aside><div>
+<p><strong>Benefits:</strong> can correct local mismatches (e.g cortical folds)</p>
+<p><strong>Drawbacks:</strong> computationally expensive, slow, deformation files are large</p>
+<p><strong>SyN properties:</strong> 1-to-1 mapping, invertible, smooth, topology-preserving</p>
+</div></aside></section>
+<section id="image-registration-as-an-optimisation-problem" class="slide level2">
+<h2>Image registration as an optimisation problem</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li><p><strong>Degrees of freedom (DOF):</strong> rigid (6), affine (12), nonlinear (n_voxels x 3)</p></li>
+<li><p><strong>Constraints:</strong> maximize similarity, minimize deformation</p></li>
+<li><p><strong>Similarity metrics:</strong> mutual information, cross-correlation etc.</p></li>
+<li><p><strong>Optimisation algorithms:</strong> Nowdays mostly gradient descent/ascent</p></li>
+</ul>
+</div><div class="column fragment" style="width:50%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/scale_pyramid.png" height="400"></p>
+<figcaption>The “scale pyramid”</figcaption>
+</figure>
+</div>
+<ul>
+<li>First match rough features, then refine</li>
+<li>First linear, then nonlinear</li>
+<li>Increase DOF as we go down the pyramid</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="advanced-normalisation-tools-ants" class="slide level2">
+<h2>Advanced Normalisation Tools (ANTs)</h2>
+<p><a href="https://github.com/ANTsX/ANTs">ANTS</a></p>
+<ul>
+<li>implemented in C++</li>
+<li>uses ITK (Insight Segmentation and Registration Toolkit)</li>
+<li>command-line interface</li>
+<li>includes the <em>canonical</em> SyN algorithm implementation</li>
+<li>provides full control over the optimisation process:
+<ul>
+<li>transform types, DOF, similarity metrics, “scale pyramid” traversal, etc.</li>
+</ul></li>
+<li>Two main commands: <code>antsRegistration</code> and <code>antsApplyTransforms</code></li>
+<li>Provides some shell scripts for convenience:
+<ul>
+<li>e.g.&nbsp;<code>antsMultivariateTemplateConstruction2.sh</code></li>
+</ul></li>
+<li>very powerful, but not very user-friendly</li>
+</ul>
+</section></section>
+<section>
+<section id="how-to-build-a-brain-atlas" class="title-slide slide level1 center">
+<h1>How to build a brain atlas</h1>
+
+</section>
+<section id="building-an-atlas-step-by-step" class="slide level2">
+<h2>Building an atlas step-by-step</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><strong>1. Acquire 3D whole-brain images</strong></p>
+<ul>
+<li>Medical imaging: CT, MRI</li>
+<li>3D light microscopy: STPT, fMOST, LSFM</li>
+</ul>
+<p><strong>2. Build a template</strong></p>
+<ul>
+<li>Pick a single reference subject, or</li>
+<li>Build an unbiased population average</li>
+</ul>
+</div><div class="column fragment" style="width:50%;">
+<p><strong>3. Annotate brain areas</strong></p>
+<ul>
+<li>Needs manual curation from experts</li>
+<li>Can incorporate data-driven approaches</li>
+</ul>
+<p><strong>4. Package and distribute</strong></p>
+<ul>
+<li>Publish on a public repository</li>
+<li>Make it easy to use (docs, API)</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="whats-our-plan" class="slide level2">
+<h2>What’s our plan?</h2>
+<table>
+<colgroup>
+<col style="width: 11%">
+<col style="width: 33%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Task</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1.</strong></td>
+<td>3D whole-brain imaging</td>
+<td>AMF + collaborating imaging facilites</td>
+</tr>
+<tr class="even">
+<td><strong>2.</strong></td>
+<td>Build a template</td>
+<td><code>braiglobe-template-builder</code></td>
+</tr>
+<tr class="odd">
+<td><strong>3.</strong></td>
+<td>Annotate regions</td>
+<td>Collaborating experts (with napari widgets?)</td>
+</tr>
+<tr class="even">
+<td><strong>4.</strong></td>
+<td>Package for BrainGlobe</td>
+<td>Improved <code>bg-atlasgen</code> (Alessandro &amp; Viktor)</td>
+</tr>
+<tr class="odd">
+<td><strong>5.</strong></td>
+<td>Distribution</td>
+<td><code>bg-atlasapi</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="biased-population-average" class="slide level2">
+<h2>Biased population average</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/Naive-Template-Construction.png" height="500"></p>
+</figure>
+</div>
+
+<aside><div>
+<p><strong>Benefits:</strong> fast (N - 1 registrations), improved SNR, averaging intensity across subjects</p>
+<p><strong>Drawbacks:</strong> biased (has shape of <code>Image3</code>), blurring</p>
+</div></aside></section>
+<section id="unbiased-population-average" class="slide level2">
+<h2>Unbiased population average</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<p><img data-src="img/ANTs_template_construction.png"></p>
+</div><div class="column fragment" style="width:30%;">
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/Fonov2011_Fig1.png" height="350"></p>
+<figcaption><a href="https://www.sciencedirect.com/science/article/pii/S1053811910010062">Fonov et al., 2011. <em>Neuroimage</em></a></figcaption>
+</figure>
+</div>
+</div>
+</div>
+
+<aside><div>
+<p><strong>Benefits:</strong> improved SNR, unbiased in intensity and shape, super-resolution</p>
+<p><strong>Drawbacks:</strong> computationally expensive (N x n_iter registrations)</p>
+</div></aside></section>
+<section id="iterative-averaging-sharpens-image" class="slide level2">
+<h2>Iterative averaging sharpens image</h2>
+
+<img data-src="img/allen_template_iterations.png" width="1400" class="r-stretch quarto-figure-center"><p class="caption"><a href="https://www.sciencedirect.com/science/article/pii/S0092867420304025">Wang et al., 2020. <em>Cell</em></a></p></section>
+<section id="single-subject-vs-unbiased-average" class="slide level2">
+<h2>Single-subject vs unbiased average</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/allen_single-brain_vs_template.png" height="650"></p>
+<figcaption><a href="https://www.sciencedirect.com/science/article/pii/S0092867420304025">Wang et al., 2020. <em>Cell</em></a></figcaption>
+</figure>
+</div>
+</section>
+<section id="implementations-of-unbiased-template-construction" class="slide level2">
+<h2>Implementations of unbiased template construction</h2>
+<div>
+<ul>
+<li class="fragment">ANTs: <code>antsMultivariateTemplateConstruction2.sh</code> (uses SyN for nonlinear registration)</li>
+<li class="fragment"><a href="https://github.com/CoBrALab/optimized_antsMultivariateTemplateConstruction/tree/master">optimized_antsMultivariateTemplateConstruction</a> by <a href="https://www.cobralab.ca/">CoBra Lab</a>
+<ul>
+<li class="fragment">more <em>sensible</em> defaults to the ANTs script</li>
+<li class="fragment">optimal traversal of “scale pyramid” (depending on image size)</li>
+<li class="fragment">allows resuming if interrupted</li>
+<li class="fragment">designed for parallelisation on HPC clusters (with SLURM)</li>
+<li class="fragment">integrates masking during registration</li>
+</ul></li>
+</ul>
+</div>
+</section></section>
+<section>
+<section id="brainglobe-template-builder" class="title-slide slide level1 center">
+<h1><code>brainglobe-template-builder</code></h1>
+
+</section>
+<section id="why-is-it-needed" class="slide level2 smaller">
+<h2>Why is it needed?</h2>
+<div class="columns">
+<div class="column" style="width:60%;">
+<p><em>Standing on the shoulders of giants</em> (or <em>turtles all the way down</em>):</p>
+<ul>
+<li><a href="https://github.com/brainglobe/brainglobe-template-builder"><code>brainglobe-template-builder</code></a></li>
+<li><code>optimized_antsMultivariateTemplateConstruction</code></li>
+<li><code>antsMultivariateTemplateConstruction2.sh</code></li>
+<li><code>ANTs</code></li>
+<li><code>ITK</code></li>
+</ul>
+</div><div class="column fragment" style="width:40%;">
+<p>Added value:</p>
+<ul>
+<li>GUI via napari widgets</li>
+<li>Preprocessing of images</li>
+<li>tiff &gt; nifti conversion</li>
+<li>Feed into the template construction pipeline</li>
+<li>Visualise results (QC)</li>
+</ul>
+</div>
+</div>
+
+<aside><div>
+<p>Let’s democratise template building!</p>
+</div></aside></section>
+<section id="necessary-preprocessing" class="slide level2">
+<h2>Necessary preprocessing</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/BG-template-builder%20preprocessing.png" height="650"></p>
+</figure>
+</div>
+</section>
+<section id="demo-time" class="slide level2">
+<h2>Demo time!</h2>
+<div class="quarto-figure quarto-figure-center" style="text-align: center">
+<figure>
+<p><img data-src="img/bg-template-builder-demo.png" height="650"></p>
+<figcaption><a href="https://github.com/brainglobe/brainglobe-template-builder">brainglobe-template-builder</a></figcaption>
+</figure>
+</div>
 <p><img src="img/logo_niu_light.png" class="slide-logo"></p>
 <div class="footer footer-default">
 <p>NIU team meeting | 2024-01-17</p>
 </div>
-<aside><div>
-<p>Title slide image credit: <a href="https://zenodo.org/records/4274008">Katja Heuer &amp; Roberto Toro, 2020</a></p>
-</div></aside></section>
+</section></section>
     </div>
   </div>
 
