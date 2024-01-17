@@ -1,5 +1,5 @@
 ---
-title: On brain templates and atlases and how to build them
+title: On brain templates and atlases, and how to build them
 author: Niko Sirmpilatze
 execute: 
   enabled: true
@@ -16,7 +16,7 @@ format:
             numbers: true
         chalkboard: true
         scrollable: true
-        preview-links: true
+        preview-links: false
         view-distance: 10
         mobile-view-distance: 10
         auto-animate: true
@@ -60,6 +60,7 @@ papers:
 ## Contents
 
 * On brain templates and atlases
+* Image registration primer
 * How to build a brain atlas
 * `brainglobe-template-builder`
 
@@ -75,6 +76,7 @@ Title slide image credit: [Katja Heuer & Roberto Toro, 2020](https://zenodo.org/
 [Sirmpilatze et al., 2021. eLife](https://elifesciences.org/articles/74813)
 :::
 
+# On templates and atlases
 
 ## What is a brain template?
 
@@ -232,7 +234,30 @@ Remedies
 and computation neuroanatomy in general...
 :::
 
-## How to make a new brain atlas
+# Image registration primer
+
+## linear transformations
+
+![](img/LinearTransformations.png){height=650px style="text-align: center" fig-align="center"}
+
+## Nonlinear transformations
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![source: youtube.com/3b1b](img/nonlinear-transform.jpg){height=500px style="text-align: center" fig-align="center"}
+:::
+
+::: {.column width="50%"}
+![[Symmetric Diffeomorphic (SyN): Avants et al., 2011. *Neuroimage*](https://www.sciencedirect.com/science/article/pii/S1361841507000606)](img/Avants2008_-Fig1.png){height=500px style="text-align: center" fig-align="center"}
+:::
+
+::::
+
+
+# How to build a brain atlas
+
+## Building an atlas step-by-step
 
 :::: {.columns}
 
@@ -256,8 +281,8 @@ and computation neuroanatomy in general...
 
 **4. Package and distribute**
 
-- Publish on a public repository and document
-- Make it easy to use (API?)
+- Publish on a public repository
+- Make it easy to use (docs, API)
 :::
 
 ::::
@@ -272,23 +297,44 @@ and computation neuroanatomy in general...
 | **4.** | Package for BrainGlobe | Improved `bg-atlasgen`  (Alessandro & Viktor) |
 | **5.** | Distribution | `bg-atlasapi` |
 
-## Population average templates
 
-The naive way: register and average the brains
+## Biased population average
 
-Types of registration (feature-based vs intensity-based)
+![](img/Naive-Template-Construction.png){height=500px style="text-align: center" fig-align="center"}
 
-## How to make an unbiased average
+::: aside
+**Benefits:** fast (N - 1 registrations), improved SNR, averaging intensity across subjects
 
-The Fonov 2011 method
+**Drawbacks:** biased (has shape of `Image3`), blurring
+:::
 
-Two contraints:
-- minimise MSE between each transformed image and the template
-- minimise the deformation field
+## Unbiased population average
 
-Advantages:
-- unbiased
-- super-resolution
+:::: {.columns}
+
+::: {.column width="70%"}
+![](img/ANTs_template_construction.png)
+:::
+
+::: {.column width="30%" .fragment}
+![[Fonov et al., 2011. *Neuroimage*](https://www.sciencedirect.com/science/article/pii/S1053811910010062)](img/Fonov2011_Fig1.png){height=350px style="text-align: center" fig-align="center"}
+:::
+
+::::
+
+::: aside
+**Benefits:** improved SNR, unbiased in intensity and shape, super-resolution
+
+**Drawbacks:** computationally expensive (N x n_iter registrations)
+:::
+
+## Iterative averaging sharpens image
+
+![[Wang et al., 2020. *Cell*](https://www.sciencedirect.com/science/article/pii/S0092867420304025)](img/allen_template_iterations.png){width=1400px style="text-align: center" fig-align="center"}
+
+## Single-subject vs unbiased average
+
+![[Wang et al., 2020. *Cell*](https://www.sciencedirect.com/science/article/pii/S0092867420304025)](img/allen_single-brain_vs_template.png){height=650px style="text-align: center" fig-align="center"}
 
 ## Improved with the addition of SyN
 
@@ -298,10 +344,6 @@ ANTs
 ## The unbiased averaging algorithm
 
 ![Implemented in ANTs as `antsMultivariateTemplateConstruction2.sh`](img/ANTs_template_construction.png){height=650px style="text-align: center" fig-align="center"}
-
-## The effect of iterations
-- Fonov
-- Allen
 
 ## The improved algorithm
 
@@ -324,6 +366,11 @@ template-builder -> COBRA -> ANTs
 ## Necessary preprocessing
 
 ![](img/BG-template-builder%20preprocessing.png){height=650px style="text-align: center" fig-align="center"}
+
+## Demo time!
+![[brainglobe-template-builder](https://github.com/brainglobe/brainglobe-template-builder)](img/bg-template-builder-demo.png){height=650px style="text-align: center" fig-align="center"}
+
+
 
 
 
